@@ -18,6 +18,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,12 @@ import com.sandrozbinden.entity.Rate;
 
 @Component
 public class EuroCurrencyServiceImpl implements EuroCurrencyService {
+
+	@Value("${rateservice.ecb.daily.url}")
+	private String ecbDailyURL;
+
+	@Value("${rateservice.ecb.history.url}")
+	private String ecbHistoryURL;
 
 	private static final Logger logger = LoggerFactory.getLogger(EuroCurrencyServiceImpl.class);
 	private CopyOnWriteArraySet<Rate> rates = new CopyOnWriteArraySet<>();
@@ -42,14 +49,14 @@ public class EuroCurrencyServiceImpl implements EuroCurrencyService {
 	}
 
 	@PostConstruct
-	public void initHistoryRates() {
-		addRatesFromDocument(getHistoryRatesDocument());
+	public void initHistoryRates() throws IOException {
+		addRatesFromDocument(getDocument(ecbHistoryURL));
 	}
 
 	@Scheduled(fixedDelay = 10000)
 	public void refreshDailyRates() {
 		try {
-			addRatesFromDocument(getCurrentRatesDocument());
+			addRatesFromDocument(getDocument(ecbDailyURL));
 		} catch (IOException e) {
 			logger.error("Can't get current rates", e);
 		}
@@ -76,20 +83,6 @@ public class EuroCurrencyServiceImpl implements EuroCurrencyService {
 
 	private Element getCubeRootElement(Element rootElement) {
 		return rootElement.getChildren().stream().filter(e -> e.getName().equalsIgnoreCase("Cube")).findFirst().get();
-	}
-
-	private Document getHistoryRatesDocument() {
-		try {
-			String url = "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist-90d.xml";
-			return getDocument(url);
-		} catch (IOException e) {
-			throw new RuntimeException("Can't get history rates", e);
-		}
-	}
-
-	private Document getCurrentRatesDocument() throws IOException {
-		String url = "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
-		return getDocument(url);
 	}
 
 	private Document getDocument(String url) throws IOException {
