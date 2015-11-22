@@ -41,7 +41,7 @@ public class EuroCurrencyServiceImpl implements EuroCurrencyService {
 
 	@Override
 	public CurrencyConversionInfo getRates(LocalDate date) {
-		List<Rate> filterdRates = rates.stream().filter(r -> r.getDate().toDateTimeAtStartOfDay().isEqual(date.toDateTimeAtStartOfDay())).collect(Collectors.toList());
+		List<Rate> filterdRates = rates.stream().filter(r -> r.getDate().toDateTimeAtStartOfDay().isEqual(date.toDateTimeAtStartOfDay())).sorted().collect(Collectors.toList());
 		return new CurrencyConversionInfo("EUR", DateTimeFormat.forPattern("yyyy-MM-dd").print(date), filterdRates);
 	}
 

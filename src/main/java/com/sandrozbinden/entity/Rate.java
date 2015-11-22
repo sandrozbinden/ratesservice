@@ -6,7 +6,7 @@ import org.joda.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class Rate {
+public class Rate implements Comparable<Rate> {
 
 	@JsonIgnore
 	private LocalDate date;
@@ -39,6 +39,11 @@ public class Rate {
 	@Override
 	public int hashCode() {
 		return HashCodeBuilder.reflectionHashCode(this);
+	}
+
+	@Override
+	public int compareTo(Rate o) {
+		return this.currency.compareToIgnoreCase(o.currency);
 	}
 
 }
