@@ -1,8 +1,9 @@
 package com.sandrozbinden.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
 
+import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ public class EuroCurrencyServiceImplTest {
 
 	@Test
 	public void test90SDRates() {
-		assertThat(rateSerivce.getRates().stream().filter(r -> r.getCurrency().equalsIgnoreCase("USD")).count(), greaterThanOrEqualTo(90L));
+		assertThat(rateSerivce.getRates(LocalDate.now()).getRates().stream().filter(r -> r.getCurrency().equalsIgnoreCase("USD")).count(), is(1L));
 	}
 
 }

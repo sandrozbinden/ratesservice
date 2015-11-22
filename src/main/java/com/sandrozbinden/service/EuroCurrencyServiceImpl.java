@@ -3,7 +3,6 @@ package com.sandrozbinden.service;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 
@@ -34,18 +33,14 @@ public class EuroCurrencyServiceImpl implements EuroCurrencyService {
 	@Value("${rateservice.ecb.history.url}")
 	private String ecbHistoryURL;
 
-	private static final Logger logger = LoggerFactory.getLogger(EuroCurrencyServiceImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(EuroCurrencyServiceImpl.class);
+
 	private CopyOnWriteArraySet<Rate> rates = new CopyOnWriteArraySet<>();
 
 	@Override
 	public Currency getRates(LocalDate date) {
 		List<Rate> filterdRates = rates.stream().filter(r -> r.getDate().toDateTimeAtStartOfDay().isEqual(date.toDateTimeAtStartOfDay())).collect(Collectors.toList());
 		return new Currency("EUR", DateTimeFormat.forPattern("yyyy-MM-dd").print(date), filterdRates);
-	}
-
-	@Override
-	public Set<Rate> getRates() {
-		return rates;
 	}
 
 	@PostConstruct
