@@ -60,25 +60,31 @@ public class EuroCurrencyServiceImpl implements EuroCurrencyService {
 	}
 
 	private void addRatesFromDocument(Document document) {
-		for (Element timeCubeElement : getCubeRootElement(document.getRootElement()).getChildren()) {
-			LocalDate date = getDate(timeCubeElement.getAttribute("time").getValue());
-			for (Element cubeRateElement : timeCubeElement.getChildren()) {
-				String currency = cubeRateElement.getAttribute("currency").getValue();
-				double rate = Double.parseDouble(cubeRateElement.getAttribute("rate").getValue());
-				rates.add(new Rate(currency, rate, date));
-				if (date.getDayOfWeek() == DateTimeConstants.FRIDAY) {
-					rates.add(new Rate(currency, rate, date.plusDays(1)));
-					rates.add(new Rate(currency, rate, date.plusDays(2)));
+		for (Element timeElemnt : getCubeRootElement(document.getRootElement()).getChildren()) {
+			for (Element rateElement : timeElemnt.getChildren()) {
+				Rate rate = createRate(timeElemnt, rateElement);
+				rates.add(rate);
+				if (rate.getDate().getDayOfWeek() == DateTimeConstants.FRIDAY) {
+					rates.add(new Rate(rate.getCurrency(), rate.getRate(), rate.getDate().plusDays(1)));
+					rates.add(new Rate(rate.getCurrency(), rate.getRate(), rate.getDate().plusDays(2)));
 				}
 			}
 		}
+	}
+
+	private Rate createRate(Element timeCubeElement, Element cubeRateElement) {
+		LocalDate date = getDate(timeCubeElement.getAttribute("time").getValue());
+		String currency = cubeRateElement.getAttribute("currency").getValue();
+		double rate = Double.parseDouble(cubeRateElement.getAttribute("rate").getValue());
+		return new Rate(currency, rate, date);
+	}
+
+	private Element getCubeRootElement(Element rootElement) {
+		return rootElement.getChildren().stream().filter(e -> e.getName().equalsIgnoreCase("Cube")).findFirst().get();
 	}
 
 	private LocalDate getDate(String date) {
 		return DateTimeFormat.forPattern("yyyy-MM-dd").parseLocalDate(date);
 	}
 
-	private Element getCubeRootElement(Element rootElement) {
-		return rootElement.getChildren().stream().filter(e -> e.getName().equalsIgnoreCase("Cube")).findFirst().get();
-	}
 }
