@@ -29,6 +29,10 @@ repositories {
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.jdom:jdom:2.0.2")
+    compile("jaxen:jaxen:1.1.6")
+    compile("joda-time:joda-time:2.3")
+    compile("org.apache.commons:commons-lang3:3.0")
     testCompile('org.springframework.boot:spring-boot-starter-test') 
 }
 
