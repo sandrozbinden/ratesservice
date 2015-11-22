@@ -24,7 +24,7 @@ import com.sandrozbinden.entity.CurrencyConversionInfo;
 import com.sandrozbinden.entity.Rate;
 
 @Component
-public class EcbEuroCurrencyService implements EuroCurrencyService {
+public class EcbEuroCurrencyService {
 
 	@Value("${rateservice.ecb.daily.url}")
 	private String ecbDailyURL;
@@ -39,7 +39,6 @@ public class EcbEuroCurrencyService implements EuroCurrencyService {
 
 	private CopyOnWriteArraySet<Rate> rates = new CopyOnWriteArraySet<>();
 
-	@Override
 	public CurrencyConversionInfo getRates(LocalDate date) {
 		List<Rate> filterdRates = rates.stream().filter(r -> r.getDate().toDateTimeAtStartOfDay().isEqual(date.toDateTimeAtStartOfDay())).sorted().collect(Collectors.toList());
 		return new CurrencyConversionInfo("EUR", DateTimeFormat.forPattern("yyyy-MM-dd").print(date), filterdRates);

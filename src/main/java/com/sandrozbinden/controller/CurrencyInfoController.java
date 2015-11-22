@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sandrozbinden.entity.CurrencyConversionInfo;
-import com.sandrozbinden.service.EuroCurrencyService;
+import com.sandrozbinden.service.EcbEuroCurrencyService;
 
 @RestController
 public class CurrencyInfoController {
 
 	@Autowired
-	private EuroCurrencyService euroCurrencyService;
+	private EcbEuroCurrencyService euroCurrencyService;
 
 	@RequestMapping("/api/rates/eur")
 	public CurrencyConversionInfo getCurrency() {

@@ -17,11 +17,11 @@ import com.sandrozbinden.RatesserviceApplication;
 public class EuroCurrencyServiceImplTest {
 
 	@Autowired
-	private EuroCurrencyService rateSerivce;
+	private EcbEuroCurrencyService euroCurrencyService;
 
 	@Test
-	public void test90SDRates() {
-		assertThat(rateSerivce.getRates(LocalDate.now()).getRates().stream().filter(r -> r.getCurrency().equalsIgnoreCase("USD")).count(), is(1L));
+	public void testTodayUSDRates() {
+		assertThat(euroCurrencyService.getRates(LocalDate.now()).getRates().stream().filter(r -> r.getCurrency().equalsIgnoreCase("USD")).count(), is(1L));
 	}
 
 }
