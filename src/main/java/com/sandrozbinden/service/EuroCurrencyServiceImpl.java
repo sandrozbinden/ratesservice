@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.sandrozbinden.entity.Currency;
+import com.sandrozbinden.entity.CurrencyConversionInfo;
 import com.sandrozbinden.entity.Rate;
 
 @Component
@@ -40,9 +40,9 @@ public class EuroCurrencyServiceImpl implements EuroCurrencyService {
 	private CopyOnWriteArraySet<Rate> rates = new CopyOnWriteArraySet<>();
 
 	@Override
-	public Currency getRates(LocalDate date) {
+	public CurrencyConversionInfo getRates(LocalDate date) {
 		List<Rate> filterdRates = rates.stream().filter(r -> r.getDate().toDateTimeAtStartOfDay().isEqual(date.toDateTimeAtStartOfDay())).collect(Collectors.toList());
-		return new Currency("EUR", DateTimeFormat.forPattern("yyyy-MM-dd").print(date), filterdRates);
+		return new CurrencyConversionInfo("EUR", DateTimeFormat.forPattern("yyyy-MM-dd").print(date), filterdRates);
 	}
 
 	@PostConstruct

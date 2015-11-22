@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sandrozbinden.entity.Currency;
+import com.sandrozbinden.entity.CurrencyConversionInfo;
 import com.sandrozbinden.service.EuroCurrencyService;
 
 @RestController
@@ -17,12 +17,12 @@ public class CurrencyController {
 	private EuroCurrencyService euroCurrencyService;
 
 	@RequestMapping("/api/rates/eur")
-	public Currency getCurrency() {
+	public CurrencyConversionInfo getCurrency() {
 		return euroCurrencyService.getRates(LocalDate.now());
 	}
 
 	@RequestMapping("/api/rates/history/eur/{date}")
-	public Currency getCurrency(@PathVariable String date) {
+	public CurrencyConversionInfo getCurrency(@PathVariable String date) {
 		return euroCurrencyService.getRates(DateTimeFormat.forPattern("yyyy-MM-dd").parseLocalDate(date));
 	}
 }

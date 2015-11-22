@@ -2,10 +2,10 @@ package com.sandrozbinden.service;
 
 import org.joda.time.LocalDate;
 
-import com.sandrozbinden.entity.Currency;
+import com.sandrozbinden.entity.CurrencyConversionInfo;
 
 public interface EuroCurrencyService {
 
-	Currency getRates(LocalDate date);
+	CurrencyConversionInfo getRates(LocalDate date);
 
 }
