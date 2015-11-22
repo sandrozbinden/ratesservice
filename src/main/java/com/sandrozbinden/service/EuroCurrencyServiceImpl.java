@@ -2,9 +2,9 @@ package com.sandrozbinden.service;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 
 import org.jdom2.Document;
@@ -14,6 +14,9 @@ import org.jdom2.input.SAXBuilder;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.sandrozbinden.entity.Currency;
@@ -22,21 +25,35 @@ import com.sandrozbinden.entity.Rate;
 @Component
 public class EuroCurrencyServiceImpl implements EuroCurrencyService {
 
+	private static final Logger logger = LoggerFactory.getLogger(EuroCurrencyServiceImpl.class);
+	private CopyOnWriteArraySet<Rate> rates = new CopyOnWriteArraySet<>();
+
+	public EuroCurrencyServiceImpl() {
+		addRatesFromDocument(getHistoryRatesDocument());
+	}
+
 	@Override
 	public Currency getRates(LocalDate date) {
-		List<Rate> rates = loadRates().stream().filter(r -> r.getDate().toDateTimeAtStartOfDay().isEqual(date.toDateTimeAtStartOfDay())).collect(Collectors.toList());
-		return new Currency("EUR", DateTimeFormat.forPattern("yyyy-MM-dd").print(date), rates);
+		List<Rate> filterdRates = rates.stream().filter(r -> r.getDate().toDateTimeAtStartOfDay().isEqual(date.toDateTimeAtStartOfDay())).collect(Collectors.toList());
+		return new Currency("EUR", DateTimeFormat.forPattern("yyyy-MM-dd").print(date), filterdRates);
 	}
 
 	@Override
 	public Set<Rate> getRates() {
-		return loadRates();
+		return rates;
 	}
 
-	private Set<Rate> loadRates() {
-		Set<Rate> rates = new HashSet<>();
-		Element rootElement = getDocument().getRootElement();
-		for (Element timeCubeElement : getCubeRootElement(rootElement).getChildren()) {
+	@Scheduled(fixedDelay = 10000)
+	public void refreshDailyRates() {
+		try {
+			addRatesFromDocument(getCurrentRatesDocument());
+		} catch (IOException e) {
+			logger.error("Can't get current rates", e);
+		}
+	}
+
+	private void addRatesFromDocument(Document document) {
+		for (Element timeCubeElement : getCubeRootElement(document.getRootElement()).getChildren()) {
 			LocalDate date = getDate(timeCubeElement.getAttribute("time").getValue());
 			for (Element cubeRateElement : timeCubeElement.getChildren()) {
 				String currency = cubeRateElement.getAttribute("currency").getValue();
@@ -48,7 +65,6 @@ public class EuroCurrencyServiceImpl implements EuroCurrencyService {
 				}
 			}
 		}
-		return rates;
 	}
 
 	private LocalDate getDate(String date) {
@@ -59,13 +75,26 @@ public class EuroCurrencyServiceImpl implements EuroCurrencyService {
 		return rootElement.getChildren().stream().filter(e -> e.getName().equalsIgnoreCase("Cube")).findFirst().get();
 	}
 
-	private Document getDocument() {
-		String url = "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist-90d.xml";
+	private Document getHistoryRatesDocument() {
 		try {
-			SAXBuilder jdomBuilder = new SAXBuilder();
+			String url = "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist-90d.xml";
+			return getDocument(url);
+		} catch (IOException e) {
+			throw new RuntimeException("Can't get history rates", e);
+		}
+	}
+
+	private Document getCurrentRatesDocument() throws IOException {
+		String url = "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
+		return getDocument(url);
+	}
+
+	private Document getDocument(String url) throws IOException {
+		SAXBuilder jdomBuilder = new SAXBuilder();
+		try {
 			return jdomBuilder.build(new URL(url));
-		} catch (JDOMException | IOException e) {
-			throw new RuntimeException("Can't get rates from url: " + url, e);
+		} catch (JDOMException e) {
+			throw new RuntimeException("Can't create document", e);
 		}
 	}
 
