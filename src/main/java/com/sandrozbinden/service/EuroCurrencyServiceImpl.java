@@ -10,13 +10,12 @@ import javax.annotation.PostConstruct;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.JDOMException;
-import org.jdom2.input.SAXBuilder;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -33,6 +32,9 @@ public class EuroCurrencyServiceImpl implements EuroCurrencyService {
 	@Value("${rateservice.ecb.history.url}")
 	private String ecbHistoryURL;
 
+	@Autowired
+	private JDomService jDomService;
+
 	private final Logger logger = LoggerFactory.getLogger(EuroCurrencyServiceImpl.class);
 
 	private CopyOnWriteArraySet<Rate> rates = new CopyOnWriteArraySet<>();
@@ -45,13 +47,13 @@ public class EuroCurrencyServiceImpl implements EuroCurrencyService {
 
 	@PostConstruct
 	public void initHistoryRates() throws IOException {
-		addRatesFromDocument(getDocument(ecbHistoryURL));
+		addRatesFromDocument(jDomService.loadDocument(new URL(ecbHistoryURL)));
 	}
 
 	@Scheduled(fixedDelay = 10000)
 	public void refreshDailyRates() {
 		try {
-			addRatesFromDocument(getDocument(ecbDailyURL));
+			addRatesFromDocument(jDomService.loadDocument(new URL(ecbDailyURL)));
 		} catch (IOException e) {
 			logger.error("Can't get current rates", e);
 		}
@@ -79,14 +81,4 @@ public class EuroCurrencyServiceImpl implements EuroCurrencyService {
 	private Element getCubeRootElement(Element rootElement) {
 		return rootElement.getChildren().stream().filter(e -> e.getName().equalsIgnoreCase("Cube")).findFirst().get();
 	}
-
-	private Document getDocument(String url) throws IOException {
-		SAXBuilder jdomBuilder = new SAXBuilder();
-		try {
-			return jdomBuilder.build(new URL(url));
-		} catch (JDOMException e) {
-			throw new RuntimeException("Can't create document", e);
-		}
-	}
-
 }
