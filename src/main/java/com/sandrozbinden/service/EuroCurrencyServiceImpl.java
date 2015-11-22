@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -28,10 +30,6 @@ public class EuroCurrencyServiceImpl implements EuroCurrencyService {
 	private static final Logger logger = LoggerFactory.getLogger(EuroCurrencyServiceImpl.class);
 	private CopyOnWriteArraySet<Rate> rates = new CopyOnWriteArraySet<>();
 
-	public EuroCurrencyServiceImpl() {
-		addRatesFromDocument(getHistoryRatesDocument());
-	}
-
 	@Override
 	public Currency getRates(LocalDate date) {
 		List<Rate> filterdRates = rates.stream().filter(r -> r.getDate().toDateTimeAtStartOfDay().isEqual(date.toDateTimeAtStartOfDay())).collect(Collectors.toList());
@@ -41,6 +39,11 @@ public class EuroCurrencyServiceImpl implements EuroCurrencyService {
 	@Override
 	public Set<Rate> getRates() {
 		return rates;
+	}
+
+	@PostConstruct
+	public void initHistoryRates() {
+		addRatesFromDocument(getHistoryRatesDocument());
 	}
 
 	@Scheduled(fixedDelay = 10000)
