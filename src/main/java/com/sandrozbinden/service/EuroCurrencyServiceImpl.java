@@ -3,7 +3,9 @@ package com.sandrozbinden.service;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -14,10 +16,17 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.stereotype.Component;
 
+import com.sandrozbinden.entity.Currency;
 import com.sandrozbinden.entity.Rate;
 
 @Component
 public class EuroCurrencyServiceImpl implements EuroCurrencyService {
+
+	@Override
+	public Currency getRates(LocalDate date) {
+		List<Rate> rates = loadRates().stream().filter(r -> r.getDate().toDateTimeAtStartOfDay().isEqual(date.toDateTimeAtStartOfDay())).collect(Collectors.toList());
+		return new Currency("EUR", DateTimeFormat.forPattern("yyyy-MM-dd").print(date), rates);
+	}
 
 	@Override
 	public Set<Rate> getRates() {

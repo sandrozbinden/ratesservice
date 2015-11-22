@@ -4,8 +4,11 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.joda.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Rate {
 
+	@JsonIgnore
 	private LocalDate date;
 	private String currency;
 	private double rate;
