@@ -11,7 +11,7 @@ import com.sandrozbinden.entity.CurrencyConversionInfo;
 import com.sandrozbinden.service.EuroCurrencyService;
 
 @RestController
-public class CurrencyController {
+public class CurrencyInfoController {
 
 	@Autowired
 	private EuroCurrencyService euroCurrencyService;
