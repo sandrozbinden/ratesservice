@@ -24,7 +24,7 @@ import com.sandrozbinden.entity.CurrencyConversionInfo;
 import com.sandrozbinden.entity.Rate;
 
 @Component
-public class EuroCurrencyServiceImpl implements EuroCurrencyService {
+public class EcbEuroCurrencyService implements EuroCurrencyService {
 
 	@Value("${rateservice.ecb.daily.url}")
 	private String ecbDailyURL;
@@ -35,7 +35,7 @@ public class EuroCurrencyServiceImpl implements EuroCurrencyService {
 	@Autowired
 	private JDomService jDomService;
 
-	private final Logger logger = LoggerFactory.getLogger(EuroCurrencyServiceImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(EcbEuroCurrencyService.class);
 
 	private CopyOnWriteArraySet<Rate> rates = new CopyOnWriteArraySet<>();
 
