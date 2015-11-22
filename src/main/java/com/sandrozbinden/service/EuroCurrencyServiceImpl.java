@@ -46,12 +46,12 @@ public class EuroCurrencyServiceImpl implements EuroCurrencyService {
 	}
 
 	@PostConstruct
-	public void initHistoryRates() throws IOException {
+	private void initHistoryRates() throws IOException {
 		addRatesFromDocument(jDomService.loadDocument(new URL(ecbHistoryURL)));
 	}
 
 	@Scheduled(fixedDelay = 10000)
-	public void refreshDailyRates() {
+	private void refreshDailyRates() {
 		try {
 			addRatesFromDocument(jDomService.loadDocument(new URL(ecbDailyURL)));
 		} catch (IOException e) {
