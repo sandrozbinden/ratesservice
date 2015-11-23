@@ -62,13 +62,19 @@ public class EcbEuroCurrencyService {
 		for (Element timeElemnt : getCubeRootElement(document.getRootElement()).getChildren()) {
 			for (Element rateElement : timeElemnt.getChildren()) {
 				Rate rate = createRate(timeElemnt, rateElement);
-				rates.add(rate);
+				addRate(rate);
 				if (rate.getDate().getDayOfWeek() == DateTimeConstants.FRIDAY) {
-					rates.add(new Rate(rate.getCurrency(), rate.getRate(), rate.getDate().plusDays(1)));
-					rates.add(new Rate(rate.getCurrency(), rate.getRate(), rate.getDate().plusDays(2)));
+					addRate(new Rate(rate.getCurrency(), rate.getRate(), rate.getDate().plusDays(1)));
+					addRate(new Rate(rate.getCurrency(), rate.getRate(), rate.getDate().plusDays(2)));
 				}
+
 			}
 		}
+	}
+
+	private void addRate(Rate rate) {
+		rates.removeIf(r -> r.getCurrency() == rate.getCurrency() && r.getDate().toDateTimeAtStartOfDay().isEqual(rate.getDate().toDateTimeAtStartOfDay()));
+		rates.add(rate);
 	}
 
 	private Rate createRate(Element timeCubeElement, Element cubeRateElement) {
